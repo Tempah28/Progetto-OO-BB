@@ -687,6 +687,6 @@ CREATE OR REPLACE PROCEDURE view_private_contact()
     query varchar(500);
 BEGIN
     query = 'create or replace view view_private_contact as select * from contact C,address A,landline L where A.idcontact=L.idContact AND L.idContact=C.idContact AND C.type=' || quote_literal(private);
-    EXECUTE query
+    EXECUTE query;
 END;
 $$;
