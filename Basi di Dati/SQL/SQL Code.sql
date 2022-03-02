@@ -143,27 +143,26 @@ ALTER TABLE MOBILE
 -- *********************
 
 CREATE TABLE GROUPS(
-	idGroup SERIAL NOT NULL,
 	name VARCHAR(15) NOT NULL,
 	description VARCHAR(50)
 );
 
 ALTER TABLE GROUPS
 -- Aggiunta del vincolo di chiave primaria
-	ADD CONSTRAINT groups_pk PRIMARY KEY(idGroup);
+	ADD CONSTRAINT groups_pk PRIMARY KEY(name);
 	
 -- *****************************
 -- *** Tabella CONTACT_GROUP ***
 -- *****************************
 
 CREATE TABLE CONTACT_GROUP(
-	idGroup SERIAL NOT NULL,
+	name VARCHAR(15) NOT NULL,
 	idContact SERIAL NOT NULL
 );
 
 ALTER TABLE CONTACT_GROUP
 -- Aggiunta del vincolo di chiave primaria
-	ADD CONSTRAINT group_pk PRIMARY KEY(idGroup,idContact),
+	ADD CONSTRAINT group_pk PRIMARY KEY(name,idContact),
 -- Aggiunta del vincolo di chiave esterna sulla tabella CONTACT
 	ADD CONSTRAINT group_fk FOREIGN KEY(idContact) REFERENCES CONTACT(idContact)
 		ON UPDATE CASCADE
@@ -222,36 +221,36 @@ INSERT INTO GROUPS(name,description) VALUES
 ('napoli','test'),
 ('siParea','vamosAbailar');
 
-INSERT INTO CONTACT_GROUP(idGroup, idContact) VALUES
-('1','1'),
-('1','2'),
-('1','3'),
-('1','4'),
-('1','5'),
-('1','6'),
-('1','7'),
-('1','8'),
-('1','9'),
-('1','13'),
-('1','21'),
-('1','22'),
-('2','1'),
-('2','2'),
-('2','3'), 
-('3','1'),
-('3','2'),
-('3','3'),
-('3','11'),
-('3','19'),
-('3','21'),
-('3','22'),
-('3','13'),
-('3','7'),
-('4','1'),
-('4','20'),
-('4','10'),
-('4','25'),
-('4','22');
+INSERT INTO CONTACT_GROUP(name, idContact) VALUES
+('unina','1'),
+('unina','2'),
+('unina','3'),
+('unina','4'),
+('unina','5'),
+('unina','6'),
+('unina','7'),
+('unina','8'),
+('unina','9'),
+('unina','13'),
+('unina','21'),
+('unina','22'),
+('progetto','1'),
+('progetto','2'),
+('progetto','3'), 
+('napoli','1'),
+('napoli','2'),
+('napoli','3'),
+('napoli','11'),
+('napoli','19'),
+('napoli','21'),
+('napoli','22'),
+('napoli','13'),
+('napoli','7'),
+('siParea','1'),
+('siParea','20'),
+('siParea','10'),
+('siParea','25'),
+('siParea','22');
 
 
 INSERT INTO ADDRESS(idContact, street, city, Postal_Code, Country, typeA) VALUES
@@ -342,7 +341,7 @@ INSERT INTO MESSAGING_ACCOUNT(idContact, NameF, Nickname, Bio, Email) VALUES
 ('2','Instagram','alemau','Hello','alessa.mauriello@studenti.unina.it'),
 ('3','Facebook','antoniotodi','Hello','antonio.todisco@libero.com');
 
--- SELECT first_name,last_name from contact as C,groups as G,contact_group as CG where C.idContact=CG.idContact AND G.idGroup=CG.idGroup and G.name='progetto'
+-- SELECT first_name,last_name from contact as C,groups as G,contact_group as CG where C.idContact=CG.idContact AND G.name=CG.name and G.name='progetto'
 
 
 -- ******************************
@@ -478,13 +477,13 @@ $$;
 
 -- insert_contact_group: procedura per l'inserimento di un contatto in un gruppo
 
-CREATE OR REPLACE PROCEDURE insert_contact_group(idContact VARCHAR(500), idGroup VARCHAR(500))
+CREATE OR REPLACE PROCEDURE insert_contact_group(idContact VARCHAR(500), name VARCHAR(15))
 	LANGUAGE 'plpgsql'
 	AS $$
 		DECLARE 
     query varchar(500);
 BEGIN
-	query := 'INSERT INTO CONTACT_GROUP(idGroup, idContact) VALUES (' || quote_literal(idGroup) || ',' || quote_literal(idContact) || ')';
+	query := 'INSERT INTO CONTACT_GROUP(name, idContact) VALUES (' || quote_literal(name) || ',' || quote_literal(idContact) || ')';
 	EXECUTE query;
 END;
 $$;
