@@ -1,3 +1,6 @@
+### Istruzioni per la base di dati
+- inserire il codice sql nel database postresql
+
 ### Parti del file sql
 - [Riga 1-14 per la creazione di domini](https://github.com/Tempah28/Progetto-OO-BB/blob/main/Basi%20di%20Dati/SQL/SQL%20Code.sql#L1)
 - [Riga 16-171 Creazione delle tabelle](https://github.com/Tempah28/Progetto-OO-BB/blob/main/Basi%20di%20Dati/SQL/SQL%20Code.sql#L16)
