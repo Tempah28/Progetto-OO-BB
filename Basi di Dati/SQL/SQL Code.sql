@@ -431,23 +431,23 @@ CREATE OR REPLACE PROCEDURE create_contact(first_name FIRST_NAME, Last_Name LAST
 	Landline_R VARCHAR(15),Number_M VARCHAR(15),Mobile_R VARCHAR(15))
 	LANGUAGE 'plpgsql'
 	AS $$
-		DECLARE 
+	DECLARE 
     query varchar(500);
 	idC int;
 BEGIN
     query := 'INSERT INTO CONTACT(First_Name,Last_Name,Photo,Type) VALUES (' || quote_literal(first_name) || ',' || quote_literal(last_name) || ',' || quote_literal(Photo) || ',' || quote_literal(Type) || ')';
     EXECUTE query;
-	SELECT idcontact into idC from CONTACT C where C.first_name = quote_literal(first_name) and C.last_name = quote_literal(last_name) LIMIT 1;
+	query := 'SELECT idcontact from CONTACT C where C.first_name = ' || quote_literal(first_name) || ' and C.last_name = ' || quote_literal(last_name) || ' LIMIT 1';
+    EXECUTE query into idC;
 	query := 'INSERT INTO EMAIL(email,idContact) VALUES (' || quote_literal(Email) || ',' || quote_literal(idC) || ')';
 	EXECUTE query;
 	query := 'INSERT INTO ADDRESS(idContact, street, city, Postal_Code, Country, typeA) VALUES (' || quote_literal(idC) || ',' || quote_literal(street) || ',' || quote_literal(city) || ',' || quote_literal(Postal_Code) || ',' || quote_literal(Country) || ',' || quote_literal(TypeA) || ')';
 	EXECUTE query;
 	query := 'INSERT INTO MOBILE(Number, idContact) VALUES (' || quote_literal(Number_M) || ',' || quote_literal(idC) || ')';
 	EXECUTE query;
-	query := 'INSERT INTO MOBILE(Number, idContact,Mobile) VALUES (' || quote_literal(Number_L) || ',' || quote_literal(idC) || ',' || quote_literal(Landline_R) || ')';
+	query := 'INSERT INTO LANDLINE(Number, idContact,Mobile) VALUES (' || quote_literal(Number_L) || ',' || quote_literal(idC) || ',' || quote_literal(Landline_R) || ')';
 	EXECUTE query;
 END;
-$$;
 	
 -- insert_email: procedura per l'inserimento di una mail
 
