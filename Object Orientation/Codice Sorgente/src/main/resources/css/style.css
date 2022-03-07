@@ -1,0 +1,10 @@
+#account-button .ikonli-font-icon {
+    -fx-icon-code: "mdi-account-plus";
+    -fx-icon-color: white;
+    -fx-icon-size: 18;
+}
+
+
+#applicationTitle {
+    -fx-text-fill: #ffffff;
+}
