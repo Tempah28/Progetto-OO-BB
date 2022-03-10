@@ -1,14 +1,13 @@
 package com.progettooo.rubrica.controller;
 
+import com.progettooo.rubrica.Model.Contact;
+import com.progettooo.rubrica.Model.newContactModel;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
 
 import java.net.URL;
-import java.time.OffsetDateTime;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 public class EditContactController implements Controller, Initializable {
@@ -17,7 +16,15 @@ public class EditContactController implements Controller, Initializable {
     @FXML
     private TextField lastNameTextField;
     @FXML
-    private TextField addressTextField;
+    private TextField streetTextField;
+    @FXML
+    private TextField capTextField;
+    @FXML
+    private TextField cityTextField;
+    @FXML
+    private TextField countryTextField;
+    @FXML
+    private TextField landlineNumberTextField;
     @FXML
     private TextField mobileNumberTextField;
     @FXML
@@ -33,36 +40,51 @@ public class EditContactController implements Controller, Initializable {
     @FXML
     private Label emailAddressMessageLabel;
 
+
+    private Contact contactt;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
     }
 
-   /* public void setContactProperty(ContactProperty contactProperty) {
-        this.contactProperty = contactProperty;
-        this.setContactValues();
+    public void setContactProperty(Contact contact) {
+        this.contactt = contact;
+        this.setContact();
+    }
+    public void setContact() {
+        this.firstNameTextField.setText(this.contactt.getFirst_name());
+        this.lastNameTextField.setText(this.contactt.getLast_name());
+        this.mobileNumberTextField.setText(this.contactt.getMobile());
+        this.emailAddressTextField.setText(this.contactt.getEmail());
+        this.landlineNumberTextField.setText(this.contactt.getLandline());
+        String address = this.contactt.getAddress();
+        String[] array = address.split(",");
+        this.streetTextField.setText(array[0]);
+        this.cityTextField.setText(array[1]);
+        this.capTextField.setText(array[2]);
+        this.countryTextField.setText(array[3]);
     }
 
-    private void setContactValues() {
-        this.firstNameTextField.setText(this.contactProperty.getFirstName());
-        this.lastNameTextField.setText(this.contactProperty.getLastName());
-        this.addressTextField.setText(this.contactProperty.getAddress());
-        this.mobileNumberTextField.setText(this.contactProperty.getMobileNumber());
-        this.emailAddressTextField.setText(this.contactProperty.getEmailAddress());
-    }
 
-    public ContactProperty contactProperty() {
-        return new ContactProperty()
-                .setId(this.contactProperty.getId())
-                .setFirstName(firstNameTextField.getText())
-                .setLastName(lastNameTextField.getText())
-                .setAddress(addressTextField.getText())
-                .setMobileNumber(mobileNumberTextField.getText())
-                .setEmailAddress(emailAddressTextField.getText())
-                .setCreatedAt(this.contactProperty.getCreatedAt())
-                .setUpdatedAt(OffsetDateTime.now());
-    }
+    public newContactModel contactProperty() {
+        newContactModel contact;
+        contact = new newContactModel(
+                firstNameTextField.getText(),
+                lastNameTextField.getText(),
+                emailAddressTextField.getText(),
+                mobileNumberTextField.getText(),
+                landlineNumberTextField.getText(),
+                streetTextField.getText(),
+                Integer.parseInt(capTextField.getText()),
+                cityTextField.getText(),
+                countryTextField.getText());
+        contact.setIdContact(this.contactt.getIdContact());
 
+
+        return contact;
+    }
+    /*
     public void validation(Map<String, String> violations) {
         if (violations.containsKey("firstName")) {
             this.firstNameMessageLabel.setVisible(true);
@@ -70,9 +92,9 @@ public class EditContactController implements Controller, Initializable {
             this.firstNameMessageLabel.setTextFill(Color.RED);
         } else {
             this.firstNameMessageLabel.setText(null);
-        }*/
+        }
 
-        /*if (violations.containsKey("lastName")) {
+        if (violations.containsKey("lastName")) {
             this.lastNameTextField.setStyle("-fx-text-box-border: #B22222; -fx-focus-color: #B22222;");
             this.lastNameMessageLabel.setVisible(true);
             this.lastNameMessageLabel.setText("il cognome non é valido");

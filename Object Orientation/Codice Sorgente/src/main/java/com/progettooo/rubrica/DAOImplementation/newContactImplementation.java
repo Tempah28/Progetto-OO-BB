@@ -1,11 +1,15 @@
 package com.progettooo.rubrica.DAOImplementation;
+
 import com.progettooo.rubrica.DAO.newContact;
 import com.progettooo.rubrica.Model.newContactModel;
 import com.progettooo.rubrica.database.Connessione;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import static com.progettooo.rubrica.controller.PasswordController.PrivateR;
 
 public class newContactImplementation implements newContact {
 
@@ -34,7 +38,11 @@ public class newContactImplementation implements newContact {
             ContactQuery.setString(1,newcontact.getFirst_name());
             ContactQuery.setString(2,newcontact.getLast_name());
             ContactQuery.setString(3,"null");
-            ContactQuery.setString(4,"public");
+            if (!PrivateR) {
+                ContactQuery.setString(4, "public");
+            }else{
+                ContactQuery.setString(4, "private");
+            }
             ContactQuery.setString(5,newcontact.getEmail());
             ContactQuery.setString(6,newcontact.getStreet());
             ContactQuery.setString(7,newcontact.getCity());

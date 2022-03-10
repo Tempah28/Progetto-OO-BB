@@ -1,6 +1,6 @@
 package com.progettooo.rubrica.controller;
 
-import com.progettooo.rubrica.Model.ContactSearchModel;
+import com.progettooo.rubrica.Model.Contact;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -19,14 +19,18 @@ public class ViewContactController implements Controller, Initializable {
     private Label emailAddressLabel;
     @FXML
     private Label addressLabel;
+    @FXML
+    private Label landlineNumberLabel;
 
-    private ContactSearchModel contactt;
+    private Contact contactt;
+
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle){
     }
 
-    public void setContactProperty(ContactSearchModel contact) {
+    public void setContactProperty(Contact contact) {
         this.contactt = contact;
         this.setContact();
     }
@@ -35,6 +39,7 @@ public class ViewContactController implements Controller, Initializable {
         this.lastNameLabel.setText(contactt.getLast_name());
         this.addressLabel.setText(contactt.getAddress());
         this.mobileNumberLabel.setText(contactt.getMobile());
+        this.landlineNumberLabel.setText(contactt.getLandline());
         this.emailAddressLabel.setText(contactt.getEmail());
     }
 }

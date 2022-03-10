@@ -1,8 +1,10 @@
 package com.progettooo.rubrica.controller;
 
-import com.progettooo.rubrica.DAOImplementation.newContactImplementation;
-import com.progettooo.rubrica.Model.ContactSearchModel;
 import com.progettooo.rubrica.AddressBook;
+import com.progettooo.rubrica.DAOImplementation.PrivateContactImplementation;
+import com.progettooo.rubrica.DAOImplementation.editContactImplementation;
+import com.progettooo.rubrica.DAOImplementation.newContactImplementation;
+import com.progettooo.rubrica.Model.Contact;
 import com.progettooo.rubrica.Model.newContactModel;
 import com.progettooo.rubrica.database.Connessione;
 import javafx.application.Platform;
@@ -22,45 +24,48 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Paint;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import jfxtras.styles.jmetro.JMetro;
+import jfxtras.styles.jmetro.Style;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
+
+import static com.progettooo.rubrica.controller.PasswordController.PrivateR;
 
 public class MainController implements Controller, Initializable {
     @FXML
     private BorderPane headerBorderPane;
     private double xOffset = 0;
     private double yOffset = 0;
+
     @FXML
-    private FontIcon closeWindowFontIcon;
+    private TableView<Contact> contactTableView;
     @FXML
-    private FontIcon minimizeWindowFontIcon;
+    private TableColumn<Contact,String> firstNameTableColumn;
+    @FXML
+    private TableColumn<Contact,String> LastNameTableColumn;
+    @FXML
+    private TableColumn<Contact,String> idContactTableColumn;
+    @FXML
+    private TableColumn<Contact,String> emailTableColumn;
+    @FXML
+    private TableColumn<Contact,String> addressTableColumn;
+    @FXML
+    private TableColumn<Contact,String> mobileTableColumn;
+    @FXML
+    private TableColumn<Contact,String> landlineTableColumn;
+
+    ObservableList<Contact> contactObservableList = FXCollections.observableArrayList();
+    ObservableList<Contact> data;
+
     @FXML
     private Label applicationTitle;
-
-    @FXML
-    private TableView<ContactSearchModel> contactTableView;
-    @FXML
-    private TableColumn<ContactSearchModel,String> firstNameTableColumn;
-    @FXML
-    private TableColumn<ContactSearchModel,String> LastNameTableColumn;
-    @FXML
-    private TableColumn<ContactSearchModel,String> idContactTableColumn;
-    @FXML
-    private TableColumn<ContactSearchModel,String> emailTableColumn;
-    @FXML
-    private TableColumn<ContactSearchModel,String> addressTableColumn;
-    @FXML
-    private TableColumn<ContactSearchModel,String> mobileTableColumn;
-    @FXML
-    private TableColumn<ContactSearchModel,String> landlineTableColumn;
-
-    ObservableList<ContactSearchModel> ContactSearchModelObservableList = FXCollections.observableArrayList();
-
-
     @FXML
     private BorderPane contactBorderPane;
     @FXML
@@ -72,14 +77,16 @@ public class MainController implements Controller, Initializable {
     @FXML
     private BorderPane secondActionBorderPane;
     @FXML
+    private BorderPane thirdActionBorderPane;
+    @FXML
     private TextField searchContactTextField;
     @FXML
     private Button savebutton;
     private Button cancelbutton;
     @FXML
-    private Button privateButton;
+    private Button deletebutton;
     @FXML
-    private FontIcon newContactFontIcon;
+    private Button privateButton;
     private FontIcon editFontIcon;
     private FontIcon deleteFontIcon;
     private FontIcon cancelFontIcon;
@@ -87,7 +94,6 @@ public class MainController implements Controller, Initializable {
     private Connection connection;
 
     private ResourceBundle resourceBundle;
-    private Stage primaryStage;
     private Button editbutton;
     @FXML
     private PasswordField passwordPF;
@@ -111,11 +117,9 @@ public class MainController implements Controller, Initializable {
         this.initContactActionFontIcons();
         this.ContactSearch();
         this.editContact();
+        this.deleteContact();
         privateButton.setOnAction((event)->{
-            String resultMap = this.PrivateContact();
-            if (!resultMap.isEmpty()){
-
-            }
+            this.PrivateContact();
         });
 
     }
@@ -124,7 +128,7 @@ public class MainController implements Controller, Initializable {
     public void ContactSearch(){
 
         try {
-        PreparedStatement statement = connection.prepareStatement("Select C.idContact,C.first_name,C.last_name,E.email,A.street,A.city,A.postal_code,A.country,M.number as mobile,L.number as landline FROM CONTACT C,email E,landline L,mobile M,ADDRESS A where C.idContact = E.idContact AND E.idContact = L.idContact AND L.idContact = M.idContact and M.idContact = A.idContact and A.typeA = 'primary'");
+        PreparedStatement statement = connection.prepareStatement("Select C.idContact,C.first_name,C.last_name,E.email,A.street,A.city,A.postal_code,A.country,M.number as mobile,L.number as landline FROM CONTACT C,email E,landline L,mobile M,ADDRESS A where C.idContact = E.idContact AND E.idContact = L.idContact AND L.idContact = M.idContact and M.idContact = A.idContact and C.type = 'public'");
         ResultSet resultSet = statement.executeQuery();
 
 
@@ -139,7 +143,7 @@ public class MainController implements Controller, Initializable {
             String Address = resultSet.getString("street")+","+resultSet.getString("city")+","+resultSet.getString("postal_code")+","+resultSet.getString("country");
 
 
-            ContactSearchModelObservableList.add(new ContactSearchModel(idContact,email,name,last_name,mobile,landline,Address));
+            contactObservableList.add(new Contact(idContact,email,name,last_name,mobile,landline,Address));
         }
 
         firstNameTableColumn.setCellValueFactory(new PropertyValueFactory<>("first_name"));
@@ -150,28 +154,29 @@ public class MainController implements Controller, Initializable {
         mobileTableColumn.setCellValueFactory(new PropertyValueFactory<>("mobile"));
         landlineTableColumn.setCellValueFactory(new PropertyValueFactory<>("landline"));
 
-        contactTableView.setItems(ContactSearchModelObservableList);
+        data = FXCollections.observableArrayList(contactObservableList);
+        contactTableView.setItems(contactObservableList);
 
-            FilteredList<ContactSearchModel> filteredList = new FilteredList<>(ContactSearchModelObservableList, b-> true);
+            FilteredList<Contact> filteredList = new FilteredList<>(contactObservableList, b-> true);
             searchContactTextField.textProperty().addListener((observable, oldValue, newValue) ->
-                    filteredList.setPredicate(ContactSearchModel -> {
+                    filteredList.setPredicate(Contact -> {
                             if (newValue.isEmpty() || newValue.isBlank() || newValue == null){
                                 return true;
                             }
 
                             String searchKeyword = newValue.toLowerCase();
 
-                            if (ContactSearchModel.getFirst_name().toLowerCase().contains(searchKeyword)){
+                            if (Contact.getFirst_name().toLowerCase().contains(searchKeyword)){
                                 return true;
-                            } else if (ContactSearchModel.getLast_name().toLowerCase().contains(searchKeyword)){
+                            } else if (Contact.getLast_name().toLowerCase().contains(searchKeyword)){
                                 return true;
-                            } else if (ContactSearchModel.getEmail().toLowerCase().contains(searchKeyword)) {
+                            } else if (Contact.getEmail().toLowerCase().contains(searchKeyword)) {
                                 return true;
-                            }else if (ContactSearchModel.getIdContact().toString().contains(searchKeyword)) {
+                            }else if (Contact.getIdContact().toString().contains(searchKeyword)) {
                                 return true;
-                            }else if (ContactSearchModel.getLandline().replaceAll(" ","").contains(searchKeyword)) {
+                            }else if (Contact.getLandline().replaceAll(" ","").contains(searchKeyword)) {
                                 return true;
-                            }else if (ContactSearchModel.getMobile().replaceAll(" ","").contains(searchKeyword)) {
+                            }else if (Contact.getMobile().replaceAll(" ","").contains(searchKeyword)) {
                                 return true;
                             }else {
                                 return false;
@@ -179,7 +184,7 @@ public class MainController implements Controller, Initializable {
 
                     }));
 
-            SortedList<ContactSearchModel> sortedData = new SortedList<>(filteredList);
+            SortedList<Contact> sortedData = new SortedList<>(filteredList);
             sortedData.comparatorProperty().bind(contactTableView.comparatorProperty());
             contactTableView.setItems(sortedData);
 
@@ -189,20 +194,23 @@ public class MainController implements Controller, Initializable {
     }
 
     public void Tableclick() throws IOException{
-        ContactSearchModel contact = contactTableView.getSelectionModel().getSelectedItem();
-        FXMLLoader fxmlLoader = new FXMLLoader(AddressBook.class.getResource("ViewContactController.fxml"));
-        AnchorPane pane = fxmlLoader.load();
-        contactBorderPane.setCenter(pane);
-        ViewContactController view = fxmlLoader.getController();
-        view.setContactProperty(contact);
-        contactActionBorderPane.setVisible(true);
-        contactActionLabel.setVisible(true);
-        contactActionBorderPane.setStyle("-fx-background-color: #CCCCCC");
-        contactActionLabel.setStyle("-fx-text-fill: #3F51B5");
-        contactActionLabel.setText("Visualizza Contatto");
-        contactActionLabel.setVisible(true);
-        firstActionBorderPane.setCenter(editbutton);
-        secondActionBorderPane.setCenter(cancelbutton);
+        Contact contact = contactTableView.getSelectionModel().getSelectedItem();
+        if (contact != null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(AddressBook.class.getResource("ViewContactController.fxml"));
+            AnchorPane pane = fxmlLoader.load();
+            contactBorderPane.setCenter(pane);
+            ViewContactController view = fxmlLoader.getController();
+            view.setContactProperty(contact);
+            contactActionBorderPane.setVisible(true);
+            contactActionLabel.setVisible(true);
+            contactActionBorderPane.setStyle("-fx-background-color: #CCCCCC");
+            contactActionLabel.setStyle("-fx-text-fill: #3F51B5");
+            contactActionLabel.setText("Visualizza Contatto");
+            contactActionLabel.setVisible(true);
+            firstActionBorderPane.setCenter(editbutton);
+            secondActionBorderPane.setCenter(cancelbutton);
+            thirdActionBorderPane.setCenter(deletebutton);
+        }
     }
 
     private void initContactAction() {
@@ -254,25 +262,50 @@ public class MainController implements Controller, Initializable {
     }
 
     @FXML
-    private String PrivateContact() {
+    private void PrivateContact() {
         Stage stage = (Stage) closeButton.getScene().getWindow();
-        FXMLLoader loader = new FXMLLoader(AddressBook.class.getResource("PasswordController.fxml"));
-        PasswordController popupController = new PasswordController();
-        loader.setController(popupController);
-        Parent layout;
-        try {
-            layout = loader.load();
-            Scene scene = new Scene(layout);
-            Stage popupStage = new Stage();
-            popupStage.initOwner(stage);
-            popupController.setStage(popupStage);
-            popupStage.initModality(Modality.WINDOW_MODAL);
-            popupStage.setScene(scene);
-            popupStage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!PrivateR) {
+            FXMLLoader loader = new FXMLLoader(AddressBook.class.getResource("PasswordController.fxml"));
+            PasswordController popupController = new PasswordController();
+            loader.setController(popupController);
+            Parent layout;
+            try {
+                layout = loader.load();
+                Scene scene = new Scene(layout);
+                Stage popupStage = new Stage();
+                popupStage.initOwner(stage);
+                popupController.setStage(popupStage);
+                popupStage.initModality(Modality.WINDOW_MODAL);
+                JMetro jMetro = new JMetro(Style.LIGHT);
+                jMetro.setScene(scene);
+                popupStage.setScene(scene);
+                popupStage.showAndWait();
+                if (PrivateR) {
+                    PrivateContactImplementation test = new PrivateContactImplementation();
+                    contactObservableList.setAll(test.getPrivateContact());
+                    applicationTitle.setText("Rubrica Privata");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else{
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Ritorno alla rubrica pubblica");
+            alert.setHeaderText("Stai per alla rubrica pubblica.");
+            alert.setContentText("sei sicuro?");
+
+            alert.initModality(Modality.WINDOW_MODAL);
+            alert.initOwner(stage);
+            alert.showAndWait()
+                    .filter(buttonType -> buttonType == ButtonType.OK)
+                    .ifPresent(buttonType -> ToPublic());
         }
-            return passwordPF.getText();
+    }
+
+    private void ToPublic(){
+        PrivateR = false;
+        contactObservableList.setAll(data);
+        applicationTitle.setText("Rubrica");
     }
 
     @FXML
@@ -297,9 +330,9 @@ public class MainController implements Controller, Initializable {
 
             add.AggiungiContatto(newContact);
             String Address = newContact.getStreet()+","+newContact.getCity()+","+newContact.getCap()+","+newContact.getCountry();
-            ContactSearchModel contact = new ContactSearchModel(Integer.parseInt(add.getIdContact()),newContact.getEmail(),newContact.getFirst_name(),newContact.getLast_name(),newContact.getMobile(),newContact.getLandline(),Address);
+            Contact contact = new Contact(Integer.parseInt(add.getIdContact()),newContact.getEmail(),newContact.getFirst_name(),newContact.getLast_name(),newContact.getMobile(),newContact.getLandline(),Address);
             //Set<ConstraintViolation<ContactProperty>> contactConstraintViolations = this.validator.validate(contactProperty);
-                this.ContactSearchModelObservableList.add(contact);
+                this.contactObservableList.add(contact);
                 this.contactTableView.getSelectionModel().select(contact);
                 this.contactActionBorderPane.setVisible(false);
                 this.contactActionLabel.setVisible(false);
@@ -313,9 +346,11 @@ public class MainController implements Controller, Initializable {
         this.editbutton.setOnMouseClicked(mouseEvent -> {
             FXMLLoader fxmlLoader = new FXMLLoader(AddressBook.class.getResource("EditContactController.fxml"));
             AnchorPane pane = null;
+            Contact contact = contactTableView.getSelectionModel().getSelectedItem();
             try {
                 pane = fxmlLoader.load();
                 EditContactController newContactController = fxmlLoader.getController();
+                newContactController.setContactProperty(contact);
                 contactBorderPane.setCenter(pane);
                 contactActionBorderPane.setVisible(true);
                 contactActionLabel.setVisible(true);
@@ -326,7 +361,18 @@ public class MainController implements Controller, Initializable {
                 firstActionBorderPane.setCenter(cancelbutton);
                 secondActionBorderPane.setCenter(savebutton);
 
-                this.saveFontIcon.setOnMouseClicked(null);
+                this.savebutton.setOnMouseClicked(null);
+                this.savebutton.setOnMouseClicked(mouseEvent1 -> {
+                    editContactImplementation edit = new editContactImplementation();
+                    newContactModel model = newContactController.contactProperty();
+
+                    edit.EditContact(model);
+                    this.contactObservableList.set(this.contactObservableList.indexOf(contact),model.newContactToContact(model));
+                    this.contactActionBorderPane.setVisible(false);
+                    this.contactActionLabel.setVisible(false);
+                    this.contactActionLabel.setText(null);
+                    this.contactBorderPane.setCenter(null);
+                    });
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -335,21 +381,48 @@ public class MainController implements Controller, Initializable {
         });
     }
 
+    private void deleteContact() {
+        this.deletebutton.setOnMouseClicked(mouseEvent -> {
+            Contact contact = contactTableView.getSelectionModel().getSelectedItem();
+            Stage stage = (Stage) closeButton.getScene().getWindow();
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Cancella Contatto");
+            alert.setHeaderText("Sei sicuro di voler cancellare il contatto?");
+            alert.setContentText("vuoi continuare?");
+
+            alert.initModality(Modality.WINDOW_MODAL);
+            alert.initOwner(stage);
+
+            alert.showAndWait()
+                    .filter(buttonType -> buttonType == ButtonType.OK)
+                    .ifPresent(buttonType -> {
+                        editContactImplementation del = new editContactImplementation();
+                        del.DeleteContact(contact);
+                        this.contactObservableList.remove(contact);
+                        this.contactTableView.getSelectionModel().clearSelection();
+                        this.contactActionBorderPane.setVisible(false);
+                        this.contactActionLabel.setVisible(false);
+                        this.contactActionLabel.setText(null);
+                        this.contactBorderPane.setCenter(null);
+                    });
+        });
+    }
 
     private void initContactActionFontIcons() {
         this.editbutton = new Button();
-        this.editFontIcon = new FontIcon();
         this.editFontIcon = new FontIcon();
         this.editFontIcon.setIconColor(Paint.valueOf("#3F51B5"));
         this.editFontIcon.setIconLiteral("mdi-pencil-box-outline");
         this.editFontIcon.setIconSize(18);
         this.editbutton.setGraphic(editFontIcon);
 
+
+        this.deletebutton = new Button();
         this.deleteFontIcon = new FontIcon();
         this.deleteFontIcon.setIconColor(Paint.valueOf("#3F51B5"));
         this.deleteFontIcon.setIconLiteral("mdi-delete");
         this.deleteFontIcon.setIconSize(18);
-
+        this.deletebutton.setGraphic(deleteFontIcon);
 
         this.cancelbutton = new Button();
         this.cancelFontIcon = new FontIcon();

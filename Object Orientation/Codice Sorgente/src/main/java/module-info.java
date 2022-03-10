@@ -1,11 +1,11 @@
 module com.progettooo.rubrica.progetto {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.base;
 
     requires org.kordamp.ikonli.javafx;
     requires java.sql;
     requires org.jfxtras.styles.jmetro;
-
 
     opens com.progettooo.rubrica to javafx.fxml;
     exports com.progettooo.rubrica;

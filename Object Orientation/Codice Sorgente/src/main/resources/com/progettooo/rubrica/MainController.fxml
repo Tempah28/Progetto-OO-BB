@@ -14,7 +14,7 @@
       <TableView fx:id="contactTableView" onMouseClicked="#Tableclick" prefHeight="600.0" prefWidth="300.0" BorderPane.alignment="CENTER" >
          <columns>
             <TableColumn fx:id="firstNameTableColumn" prefWidth="75.0" text="Nome" />
-            <TableColumn fx:id="LastNameTableColumn" prefWidth="75.0" text="Nome" />
+            <TableColumn fx:id="LastNameTableColumn" prefWidth="75.0" text="Cognome" />
             <TableColumn fx:id="emailTableColumn"  visible="false" prefWidth="75.0"/>
             <TableColumn fx:id="addressTableColumn"  visible="false" prefWidth="75.0"/>
             <TableColumn fx:id="idContactTableColumn"  visible="false" prefWidth="75.0"/>
@@ -50,6 +50,7 @@
                <right>
                   <HBox alignment="CENTER_RIGHT" prefHeight="40.0" prefWidth="70.0">
                      <children>
+                        <BorderPane fx:id="thirdActionBorderPane" prefHeight="200.0" prefWidth="200.0" />
                         <BorderPane fx:id="firstActionBorderPane" prefHeight="200.0" prefWidth="200.0" />
                         <BorderPane fx:id="secondActionBorderPane" prefHeight="200.0" prefWidth="200.0" />
                      </children>

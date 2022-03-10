@@ -1,6 +1,5 @@
 package com.progettooo.rubrica.controller;
 
-import com.progettooo.rubrica.Model.ContactSearchModel;
 import com.progettooo.rubrica.Model.newContactModel;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -9,7 +8,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 
 import java.net.URL;
-import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.ResourceBundle;
 
