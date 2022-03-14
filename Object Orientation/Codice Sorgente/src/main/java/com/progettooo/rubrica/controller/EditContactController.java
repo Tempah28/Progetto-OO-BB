@@ -1,7 +1,7 @@
 package com.progettooo.rubrica.controller;
 
 import com.progettooo.rubrica.Model.Contact;
-import com.progettooo.rubrica.Model.newContactModel;
+import com.progettooo.rubrica.Model.newContact;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -67,9 +67,9 @@ public class EditContactController implements Controller, Initializable {
     }
 
 
-    public newContactModel contactProperty() {
-        newContactModel contact;
-        contact = new newContactModel(
+    public newContact contactProperty() {
+        newContact contact;
+        contact = new newContact(
                 firstNameTextField.getText(),
                 lastNameTextField.getText(),
                 emailAddressTextField.getText(),

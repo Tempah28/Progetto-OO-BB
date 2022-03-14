@@ -2,7 +2,7 @@ package com.progettooo.rubrica.DAOImplementation;
 
 import com.progettooo.rubrica.DAO.editContact;
 import com.progettooo.rubrica.Model.Contact;
-import com.progettooo.rubrica.Model.newContactModel;
+import com.progettooo.rubrica.Model.newContact;
 import com.progettooo.rubrica.database.Connessione;
 
 import java.sql.Connection;
@@ -23,7 +23,7 @@ public class editContactImplementation implements editContact {
     }
 
     @Override
-    public void EditContact(newContactModel contact) {
+    public void EditContact(newContact contact) {
 
         try {
             PreparedStatement statement = connection.prepareStatement("Select C.idContact,C.first_name,C.last_name,E.email,A.street,A.city,A.postal_code,A.country,M.number as mobile,L.number as landline FROM CONTACT C,email E,landline L,mobile M,ADDRESS A where C.idContact = E.idContact AND E.idContact = L.idContact AND L.idContact = M.idContact and M.idContact = A.idContact and A.typeA = 'primary' And C.IdContact= "+ contact.getIdContact());

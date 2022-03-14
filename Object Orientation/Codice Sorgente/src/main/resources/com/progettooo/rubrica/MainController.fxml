@@ -9,8 +9,20 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <?import javafx.scene.control.Button?>
-<BorderPane prefHeight="550.0" prefWidth="960.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.progettooo.rubrica.controller.MainController">
+<BorderPane fx:id="BorderPane" prefHeight="700.0" prefWidth="960.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.progettooo.rubrica.controller.MainController">
    <left>
+      <TableView fx:id="GroupTableView" onMouseClicked="#GroupTableclick" prefHeight="700.0" prefWidth="300.0" BorderPane.alignment="CENTER" >
+         <placeholder>
+            <Label text="Non esistono gruppi"/>
+         </placeholder>
+         <columns>
+            <TableColumn fx:id="GroupTableColumn" text="Gruppi" prefWidth="75.0"/>
+            <TableColumn fx:id="DescriptionTableColumn" visible="false" prefWidth="75.0"/>
+         </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
       <TableView fx:id="contactTableView" onMouseClicked="#Tableclick" prefHeight="600.0" prefWidth="300.0" BorderPane.alignment="CENTER" >
          <columns>
             <TableColumn fx:id="firstNameTableColumn" prefWidth="75.0" text="Nome" />
@@ -86,15 +98,23 @@
          <center>
             <HBox alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
                <children>
-                  <Button style="-fx-background-color: red" onAction="#addContact">
+                  <Button style="-fx-background-color: red" onMouseClicked="#groupContact" fx:id="groupButton">
+                     <tooltip><Tooltip text="Lista gruppi" /></tooltip>
                      <graphic>
-                        <FontIcon iconColor="white" iconLiteral="mdi-account-plus"/>
+                        <FontIcon iconColor="white" fx:id="GroupFontIcon" iconSize="20" iconLiteral="mdi-account-multiple"/>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="addContactButton" style="-fx-background-color: red" onAction="#addContact">
+                     <tooltip><Tooltip text="Aggiungi un contatto" /></tooltip>
+                     <graphic>
+                        <FontIcon fx:id="addContactFontIcon" iconColor="white" iconSize="20" iconLiteral="mdi-account-plus"/>
                      </graphic>
                   </Button>
                   <TextField fx:id="searchContactTextField" prefHeight="30.0" prefWidth="459.0"/>
-                  <Button style="-fx-background-color: red" fx:id="privateButton">
+                  <Button style="-fx-background-color: red" onAction="#groupContact" fx:id="privateButton">
+                     <tooltip><Tooltip text="Rubrica privata" /></tooltip>
                      <graphic>
-                        <FontIcon iconColor="white" iconLiteral="mdi-account-key"/>
+                        <FontIcon iconColor="white" iconSize="20" iconLiteral="mdi-account-key"/>
                      </graphic>
                   </Button>
                </children>

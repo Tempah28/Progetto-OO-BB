@@ -1,63 +1,45 @@
 package com.progettooo.rubrica.controller;
 
-import com.progettooo.rubrica.Model.newContact;
+import com.progettooo.rubrica.Model.Groups;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
 
 import java.net.URL;
-import java.util.Map;
 import java.util.ResourceBundle;
 
-public class NewContactController implements Controller, Initializable {
-    @FXML
-    private TextField firstNameTextField;
-    @FXML
-    private TextField lastNameTextField;
-    @FXML
-    private TextField streetTextField;
-    @FXML
-    private TextField capTextField;
-    @FXML
-    private TextField cityTextField;
-    @FXML
-    private TextField countryTextField;
-    @FXML
-    private TextField mobileNumberTextField;
-    @FXML
-    private TextField landlineNumberTextField;
-    @FXML
-    private TextField emailAddressTextField;
-    @FXML
-    private Label firstNameMessageLabel;
-    @FXML
-    private Label lastNameMessageLabel;
-    @FXML
-    private Label streetMessageLabel;
-    @FXML
-    private Label capMessageLabel;
-    @FXML
-    private Label cityMessageLabel;
-    @FXML
-    private Label countryMessageLabel;
-    @FXML
-    private Label landlineNumberMessageLabel;
-    @FXML
-    private Label mobileNumberMessageLabel;
-    @FXML
-    private Label emailAddressMessageLabel;
+public class editGroupController implements Initializable,Controller {
+        @FXML
+        private TextField GroupNameTextField;
+        @FXML
+        private TextField DescriptionTextField;
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        
-    }
 
-    public newContact contactProperty() {
-        return new newContact(firstNameTextField.getText(),lastNameTextField.getText(),emailAddressTextField.getText(),mobileNumberTextField.getText(),landlineNumberTextField.getText(),streetTextField.getText(),Integer.parseInt(capTextField.getText()),cityTextField.getText(),countryTextField.getText());
-    }
+        private Groups group;
 
+        @Override
+        public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        }
+
+        public void setGroupProperty(Groups group) {
+            this.group = group;
+            this.setGroup();
+        }
+
+        public void setGroup() {
+            this.GroupNameTextField.setText(this.group.getName());
+            this.DescriptionTextField.setText(this.group.getDescription());
+        }
+
+
+        public Groups groupProperty() {
+            Groups group;
+            group = new Groups(GroupNameTextField.getText(),DescriptionTextField.getText());
+
+            return group;
+        }
+    /*
     public void validation(Map<String, String> violations) {
         if (violations.containsKey("firstName")) {
             this.firstNameMessageLabel.setVisible(true);
@@ -77,12 +59,12 @@ public class NewContactController implements Controller, Initializable {
         }
 
         if (violations.containsKey("address")) {
-            this.streetTextField.setStyle("-fx-text-box-border: #B22222; -fx-focus-color: #B22222;");
-            this.streetMessageLabel.setVisible(true);
-            this.streetMessageLabel.setText("il campo indirizzo é vuoto");
-            this.streetMessageLabel.setTextFill(Color.RED);
+            this.addressTextField.setStyle("-fx-text-box-border: #B22222; -fx-focus-color: #B22222;");
+            this.addressMessageLabel.setVisible(true);
+            this.addressMessageLabel.setText("l'indirizzo non é valido");
+            this.addressMessageLabel.setTextFill(Color.RED);
         } else {
-            this.streetMessageLabel.setText(null);
+            this.addressMessageLabel.setText(null);
         }
 
         if (violations.containsKey("mobileNumber")) {
@@ -102,5 +84,6 @@ public class NewContactController implements Controller, Initializable {
         } else {
             this.emailAddressMessageLabel.setText(null);
         }
-    }
+    }*/
+
 }

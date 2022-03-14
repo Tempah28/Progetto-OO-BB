@@ -1,11 +1,14 @@
 package com.progettooo.rubrica.controller;
 
 import com.progettooo.rubrica.AddressBook;
+import com.progettooo.rubrica.DAOImplementation.GroupImplementation;
 import com.progettooo.rubrica.DAOImplementation.PrivateContactImplementation;
 import com.progettooo.rubrica.DAOImplementation.editContactImplementation;
-import com.progettooo.rubrica.DAOImplementation.newContactImplementation;
+import com.progettooo.rubrica.DAOImplementation.ContactImplementation;
+import com.progettooo.rubrica.Model.Account;
 import com.progettooo.rubrica.Model.Contact;
-import com.progettooo.rubrica.Model.newContactModel;
+import com.progettooo.rubrica.Model.Groups;
+import com.progettooo.rubrica.Model.newContact;
 import com.progettooo.rubrica.database.Connessione;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -45,7 +48,12 @@ public class MainController implements Controller, Initializable {
     private double yOffset = 0;
 
     @FXML
+    private BorderPane BorderPane;
+
+    @FXML
     private TableView<Contact> contactTableView;
+    @FXML
+    private TableView<Groups> GroupTableView;
     @FXML
     private TableColumn<Contact,String> firstNameTableColumn;
     @FXML
@@ -60,9 +68,14 @@ public class MainController implements Controller, Initializable {
     private TableColumn<Contact,String> mobileTableColumn;
     @FXML
     private TableColumn<Contact,String> landlineTableColumn;
+    @FXML
+    private TableColumn<Groups,String> GroupTableColumn;
+    @FXML
+    private TableColumn<Groups,String> DescriptionTableColumn;
 
     ObservableList<Contact> contactObservableList = FXCollections.observableArrayList();
     ObservableList<Contact> data;
+    ObservableList<Groups> groups = FXCollections.observableArrayList();
 
     @FXML
     private Label applicationTitle;
@@ -84,19 +97,39 @@ public class MainController implements Controller, Initializable {
     private Button savebutton;
     private Button cancelbutton;
     @FXML
+    private Button groupButton;
+    @FXML
+    private Button addGroupButton;
+    @FXML
     private Button deletebutton;
     @FXML
     private Button privateButton;
+    private FontIcon addGroupFontIcon;
+    @FXML
+    private Button addContactButton;
+    @FXML
+    private FontIcon addContactFontIcon;
+    @FXML
+    private FontIcon GroupFontIcon;
     private FontIcon editFontIcon;
     private FontIcon deleteFontIcon;
     private FontIcon cancelFontIcon;
     private FontIcon saveFontIcon;
     private Connection connection;
 
+    @FXML
+    private FontIcon editGroupFontIcon;
+    @FXML
+    private Button deleteGroupbutton;
+    @FXML
+    private FontIcon deleteGroupFontIcon;
+
     private ResourceBundle resourceBundle;
     private Button editbutton;
+    private Button editGroupbutton;
     @FXML
     private PasswordField passwordPF;
+    static boolean Check = false;
 
     public MainController() {
         try
@@ -121,6 +154,9 @@ public class MainController implements Controller, Initializable {
         privateButton.setOnAction((event)->{
             this.PrivateContact();
         });
+        this.addContactGroup();
+        this.editGroup();
+        this.deleteGroup();
 
     }
 
@@ -128,7 +164,7 @@ public class MainController implements Controller, Initializable {
     public void ContactSearch(){
 
         try {
-        PreparedStatement statement = connection.prepareStatement("Select C.idContact,C.first_name,C.last_name,E.email,A.street,A.city,A.postal_code,A.country,M.number as mobile,L.number as landline FROM CONTACT C,email E,landline L,mobile M,ADDRESS A where C.idContact = E.idContact AND E.idContact = L.idContact AND L.idContact = M.idContact and M.idContact = A.idContact and C.type = 'public'");
+        PreparedStatement statement = connection.prepareStatement("Select C.idContact,C.first_name,C.last_name,E.email,A.street,A.city,A.postal_code,A.country,M.number as mobile,L.number as landline FROM CONTACT C,email E,landline L,mobile M,ADDRESS A where C.idContact = E.idContact AND E.idContact = L.idContact AND L.idContact = M.idContact and M.idContact = A.idContact and C.type = 'public' and A.typeA = 'primary'");
         ResultSet resultSet = statement.executeQuery();
 
 
@@ -193,6 +229,8 @@ public class MainController implements Controller, Initializable {
 
     }
 
+
+
     public void Tableclick() throws IOException{
         Contact contact = contactTableView.getSelectionModel().getSelectedItem();
         if (contact != null) {
@@ -201,6 +239,10 @@ public class MainController implements Controller, Initializable {
             contactBorderPane.setCenter(pane);
             ViewContactController view = fxmlLoader.getController();
             view.setContactProperty(contact);
+            ContactImplementation account = new ContactImplementation();
+            view.setMessaging(account.getAccount(contact));
+            view.setAddress(account.getSecondaryAddress(contact));
+            view.setNumber(account.getSecondaryNumber(contact,contact.getLandline(),contact.getMobile()));
             contactActionBorderPane.setVisible(true);
             contactActionLabel.setVisible(true);
             contactActionBorderPane.setStyle("-fx-background-color: #CCCCCC");
@@ -209,7 +251,29 @@ public class MainController implements Controller, Initializable {
             contactActionLabel.setVisible(true);
             firstActionBorderPane.setCenter(editbutton);
             secondActionBorderPane.setCenter(cancelbutton);
-            thirdActionBorderPane.setCenter(deletebutton);
+            thirdActionBorderPane.setCenter(addGroupButton);
+        }
+    }
+
+    public void GroupTableclick() throws IOException{
+        Groups group = GroupTableView.getSelectionModel().getSelectedItem();
+        if (group != null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(AddressBook.class.getResource("ViewGroupController.fxml"));
+            AnchorPane pane = fxmlLoader.load();
+            contactBorderPane.setCenter(pane);
+            ViewGroupController view = fxmlLoader.getController();
+            view.setGroupProperty(group);
+            contactActionBorderPane.setVisible(true);
+            contactActionLabel.setVisible(true);
+            contactActionBorderPane.setStyle("-fx-background-color: #CCCCCC");
+            contactActionLabel.setStyle("-fx-text-fill: #3F51B5");
+            contactActionLabel.setText("Visualizza Gruppo");
+            GroupImplementation contact = new GroupImplementation();
+            view.setTablePartecipants(contact.getPartecipants(group));
+            contactActionLabel.setVisible(true);
+            firstActionBorderPane.setCenter(editGroupbutton);
+            secondActionBorderPane.setCenter(cancelbutton);
+            thirdActionBorderPane.setCenter(deleteGroupbutton);
         }
     }
 
@@ -281,7 +345,15 @@ public class MainController implements Controller, Initializable {
                 popupStage.setScene(scene);
                 popupStage.showAndWait();
                 if (PrivateR) {
+
+                    if (Check){
+                        this.groupContact();
+                    }
                     PrivateContactImplementation test = new PrivateContactImplementation();
+                    this.contactActionBorderPane.setVisible(false);
+                    this.contactActionLabel.setVisible(false);
+                    this.contactActionLabel.setText(null);
+                    this.contactBorderPane.setCenter(null);
                     contactObservableList.setAll(test.getPrivateContact());
                     applicationTitle.setText("Rubrica Privata");
                 }
@@ -304,6 +376,10 @@ public class MainController implements Controller, Initializable {
 
     private void ToPublic(){
         PrivateR = false;
+        this.contactActionBorderPane.setVisible(false);
+        this.contactActionLabel.setVisible(false);
+        this.contactActionLabel.setText(null);
+        this.contactBorderPane.setCenter(null);
         contactObservableList.setAll(data);
         applicationTitle.setText("Rubrica");
     }
@@ -322,11 +398,12 @@ public class MainController implements Controller, Initializable {
             contactActionLabel.setVisible(true);
             firstActionBorderPane.setCenter(cancelbutton);
             secondActionBorderPane.setCenter(savebutton);
+            thirdActionBorderPane.setCenter(null);
 
         this.savebutton.setOnMouseClicked(null);
         this.savebutton.setOnMouseClicked(mouseEvent1 -> {
-            newContactModel newContact = newContactController.contactProperty();
-            newContactImplementation add = new newContactImplementation();
+            newContact newContact = newContactController.contactProperty();
+            ContactImplementation add = new ContactImplementation();
 
             add.AggiungiContatto(newContact);
             String Address = newContact.getStreet()+","+newContact.getCity()+","+newContact.getCap()+","+newContact.getCountry();
@@ -339,6 +416,222 @@ public class MainController implements Controller, Initializable {
                 this.contactActionLabel.setText(null);
                 this.contactBorderPane.setCenter(null);
     });
+    }
+
+    @FXML
+    public void addAccount(String idContact) throws IOException{
+        FXMLLoader fxmlLoader = new FXMLLoader(AddressBook.class.getResource("addAccountController.fxml"));
+        AnchorPane pane = fxmlLoader.load();
+        addAccountController addAccountController = fxmlLoader.getController();
+        contactBorderPane.setCenter(pane);
+        contactActionBorderPane.setVisible(true);
+        contactActionLabel.setVisible(true);
+        contactActionBorderPane.setStyle("-fx-background-color: #CCCCCC");
+        contactActionLabel.setStyle("-fx-text-fill: #3F51B5");
+        contactActionLabel.setText("Nuovo Contatto");
+        contactActionLabel.setVisible(true);
+        firstActionBorderPane.setCenter(cancelbutton);
+        secondActionBorderPane.setCenter(savebutton);
+        thirdActionBorderPane.setCenter(null);
+
+        this.savebutton.setOnMouseClicked(null);
+        this.savebutton.setOnMouseClicked(mouseEvent1 -> {
+            ContactImplementation add = new ContactImplementation();
+            Account account = addAccountController.AccountProperty(Integer.parseInt(idContact));
+            add.addAccount(account);
+            //Set<ConstraintViolation<ContactProperty>> contactConstraintViolations = this.validator.validate(contactProperty);
+            this.contactActionBorderPane.setVisible(false);
+            this.contactActionLabel.setVisible(false);
+            this.contactActionLabel.setText(null);
+            this.contactBorderPane.setCenter(null);
+        });
+    }
+
+    @FXML
+    public void addSecondaryAddress(String idContact) throws IOException{
+        FXMLLoader fxmlLoader = new FXMLLoader(AddressBook.class.getResource("addSecondaryAddressController.fxml"));
+        AnchorPane pane = fxmlLoader.load();
+        addSecondaryAddressController addSecondaryAddressController = fxmlLoader.getController();
+        contactBorderPane.setCenter(pane);
+        contactActionBorderPane.setVisible(true);
+        contactActionLabel.setVisible(true);
+        contactActionBorderPane.setStyle("-fx-background-color: #CCCCCC");
+        contactActionLabel.setStyle("-fx-text-fill: #3F51B5");
+        contactActionLabel.setText("Nuovo Contatto");
+        contactActionLabel.setVisible(true);
+        firstActionBorderPane.setCenter(cancelbutton);
+        secondActionBorderPane.setCenter(savebutton);
+        thirdActionBorderPane.setCenter(null);
+
+        this.savebutton.setOnMouseClicked(null);
+        this.savebutton.setOnMouseClicked(mouseEvent1 -> {
+            ContactImplementation add = new ContactImplementation();
+            newContact contact = addSecondaryAddressController.SecondaryAddressProperty(Integer.parseInt(idContact));
+            add.addSecondaryAddress(contact);
+            //Set<ConstraintViolation<ContactProperty>> contactConstraintViolations = this.validator.validate(contactProperty);
+            this.contactActionBorderPane.setVisible(false);
+            this.contactActionLabel.setVisible(false);
+            this.contactActionLabel.setText(null);
+            this.contactBorderPane.setCenter(null);
+        });
+    }
+
+
+    @FXML
+    public void addSecondaryNumber(String idContact) throws IOException{
+        FXMLLoader fxmlLoader = new FXMLLoader(AddressBook.class.getResource("addSecondaryNumberController.fxml"));
+        AnchorPane pane = fxmlLoader.load();
+        addSecondaryNumberController addSecondaryNumberController = fxmlLoader.getController();
+        contactBorderPane.setCenter(pane);
+        contactActionBorderPane.setVisible(true);
+        contactActionLabel.setVisible(true);
+        contactActionBorderPane.setStyle("-fx-background-color: #CCCCCC");
+        contactActionLabel.setStyle("-fx-text-fill: #3F51B5");
+        contactActionLabel.setText("Nuovo Contatto");
+        contactActionLabel.setVisible(true);
+        firstActionBorderPane.setCenter(cancelbutton);
+        secondActionBorderPane.setCenter(savebutton);
+        thirdActionBorderPane.setCenter(null);
+
+        this.savebutton.setOnMouseClicked(null);
+        this.savebutton.setOnMouseClicked(mouseEvent1 -> {
+            ContactImplementation add = new ContactImplementation();
+            newContact contact = addSecondaryNumberController.SecondaryNumberProperty(Integer.parseInt(idContact));
+            add.addSecondaryNumber(contact);
+            //Set<ConstraintViolation<ContactProperty>> contactConstraintViolations = this.validator.validate(contactProperty);
+            this.contactActionBorderPane.setVisible(false);
+            this.contactActionLabel.setVisible(false);
+            this.contactActionLabel.setText(null);
+            this.contactBorderPane.setCenter(null);
+        });
+    }
+
+    @FXML
+    private void addGroup() throws IOException{
+        FXMLLoader fxmlLoader = new FXMLLoader(AddressBook.class.getResource("addGroupController.fxml"));
+        AnchorPane pane = fxmlLoader.load();
+        addGroupController addGroupController = fxmlLoader.getController();
+        contactBorderPane.setCenter(pane);
+        contactActionBorderPane.setVisible(true);
+        contactActionLabel.setVisible(true);
+        contactActionBorderPane.setStyle("-fx-background-color: #CCCCCC");
+        contactActionLabel.setStyle("-fx-text-fill: #3F51B5");
+        contactActionLabel.setText("Nuovo Gruppo");
+        contactActionLabel.setVisible(true);
+        firstActionBorderPane.setCenter(cancelbutton);
+        secondActionBorderPane.setCenter(savebutton);
+        thirdActionBorderPane.setCenter(null);
+
+        this.savebutton.setOnMouseClicked(null);
+        this.savebutton.setOnMouseClicked(mouseEvent1 -> {
+            Groups newGroup = addGroupController.GroupProperty();
+            GroupImplementation add = new GroupImplementation();
+
+            add.addGroup(newGroup);
+            //Set<ConstraintViolation<ContactProperty>> contactConstraintViolations = this.validator.validate(contactProperty);
+            this.groups.add(newGroup);
+            this.contactActionBorderPane.setVisible(false);
+            this.contactActionLabel.setVisible(false);
+            this.contactActionLabel.setText(null);
+            this.contactBorderPane.setCenter(null);
+        });
+    }
+
+    @FXML
+    private void groupContact() throws IOException{
+            if (PrivateR && !Check){
+                PrivateContact();
+            }
+
+            if(!Check) {
+                GroupImplementation group = new GroupImplementation();
+                groups = group.getGroup();
+                GroupTableColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+                DescriptionTableColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+                GroupTableView.setItems(groups);
+                this.contactActionBorderPane.setVisible(false);
+                this.contactActionLabel.setVisible(false);
+                this.contactActionLabel.setText(null);
+                this.contactBorderPane.setCenter(null);
+                BorderPane.setLeft(GroupTableView);
+                GroupFontIcon.setIconLiteral("mdi-account");
+                GroupFontIcon.setIconColor(Paint.valueOf("white"));
+                GroupFontIcon.setIconSize(18);
+                groupButton.setGraphic(GroupFontIcon);
+                addContactFontIcon.setIconLiteral("mdi-account-multiple-plus");
+                addContactFontIcon.setIconColor(Paint.valueOf("white"));
+                addContactFontIcon.setIconSize(18);
+                addContactButton.setGraphic(addContactFontIcon);
+                addContactButton.setTooltip(new Tooltip("Crea Gruppo"));
+                addContactButton.setOnAction(e -> {
+                    try {
+                        addGroup();
+                    }catch (IOException err){
+                        err.printStackTrace();
+                    }
+                });
+                Check = true;
+            }else{
+                BorderPane.setLeft(contactTableView);
+                GroupFontIcon.setIconLiteral("mdi-account-multiple");
+                GroupFontIcon.setIconColor(Paint.valueOf("white"));
+                GroupFontIcon.setIconSize(18);
+                groupButton.setGraphic(GroupFontIcon);
+                addContactFontIcon.setIconLiteral("mdi-account-plus");
+                addContactFontIcon.setIconColor(Paint.valueOf("white"));
+                addContactFontIcon.setIconSize(18);
+                addContactButton.setGraphic(addContactFontIcon);
+                addContactButton.setTooltip(new Tooltip("Aggiungi un contatto"));
+                addContactButton.setOnAction(e -> {
+                    try {
+                        addContact();
+                    }catch (IOException err){
+                        err.printStackTrace();
+                    }
+
+                });
+                Check = false;
+            }
+    }
+
+    @FXML
+    private void editGroup() {
+        this.editGroupbutton.setOnMouseClicked(mouseEvent -> {
+            FXMLLoader fxmlLoader = new FXMLLoader(AddressBook.class.getResource("editGroupController.fxml"));
+            AnchorPane pane = null;
+            Groups group = GroupTableView.getSelectionModel().getSelectedItem();
+            try {
+                pane = fxmlLoader.load();
+                editGroupController editGroupController = fxmlLoader.getController();
+                editGroupController.setGroupProperty(group);
+                contactBorderPane.setCenter(pane);
+                contactActionBorderPane.setVisible(true);
+                contactActionLabel.setVisible(true);
+                contactActionBorderPane.setStyle("-fx-background-color: #CCCCCC");
+                contactActionLabel.setStyle("-fx-text-fill: #3F51B5");
+                contactActionLabel.setText("Modifica Contatto");
+                contactActionLabel.setVisible(true);
+                firstActionBorderPane.setCenter(cancelbutton);
+                secondActionBorderPane.setCenter(savebutton);
+
+                this.savebutton.setOnMouseClicked(null);
+                this.savebutton.setOnMouseClicked(mouseEvent1 -> {
+                    GroupImplementation edit = new GroupImplementation();
+                    Groups model = editGroupController.groupProperty();
+
+                    edit.editGroup(model,group.getName());
+                    this.groups.set(this.groups.indexOf(group),model);
+                    this.contactActionBorderPane.setVisible(false);
+                    this.contactActionLabel.setVisible(false);
+                    this.contactActionLabel.setText(null);
+                    this.contactBorderPane.setCenter(null);
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        });
     }
 
     @FXML
@@ -360,11 +653,12 @@ public class MainController implements Controller, Initializable {
                 contactActionLabel.setVisible(true);
                 firstActionBorderPane.setCenter(cancelbutton);
                 secondActionBorderPane.setCenter(savebutton);
+                thirdActionBorderPane.setCenter(deletebutton);
 
                 this.savebutton.setOnMouseClicked(null);
                 this.savebutton.setOnMouseClicked(mouseEvent1 -> {
                     editContactImplementation edit = new editContactImplementation();
-                    newContactModel model = newContactController.contactProperty();
+                    newContact model = newContactController.contactProperty();
 
                     edit.EditContact(model);
                     this.contactObservableList.set(this.contactObservableList.indexOf(contact),model.newContactToContact(model));
@@ -378,6 +672,33 @@ public class MainController implements Controller, Initializable {
             }
 
 
+        });
+    }
+
+    @FXML
+    private void addContactGroup() {
+        this.addGroupButton.setOnMouseClicked(mouseEvent -> {
+            Contact contact = contactTableView.getSelectionModel().getSelectedItem();
+            Stage stage = (Stage) closeButton.getScene().getWindow();
+                FXMLLoader loader = new FXMLLoader(AddressBook.class.getResource("addContactGroupController.fxml"));
+                addContactGroupController popupController = new addContactGroupController(contact);
+                loader.setController(popupController);
+                Parent layout;
+                try {
+                    layout = loader.load();
+                    Scene scene = new Scene(layout);
+                    Stage popupStage = new Stage();
+                    popupStage.initOwner(stage);
+                    popupController.setStage(popupStage);
+                    popupStage.initModality(Modality.WINDOW_MODAL);
+                    JMetro jMetro = new JMetro(Style.LIGHT);
+                    jMetro.setScene(scene);
+                    popupStage.setScene(scene);
+                    popupStage.showAndWait();
+
+        } catch (IOException e) {
+                    e.printStackTrace();
+                }
         });
     }
 
@@ -408,6 +729,33 @@ public class MainController implements Controller, Initializable {
         });
     }
 
+    private void deleteGroup() {
+        this.deleteGroupbutton.setOnMouseClicked(mouseEvent -> {
+            Groups group = GroupTableView.getSelectionModel().getSelectedItem();
+            Stage stage = (Stage) closeButton.getScene().getWindow();
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Cancella Contatto");
+            alert.setHeaderText("Sei sicuro di voler cancellare il contatto?");
+            alert.setContentText("vuoi continuare?");
+
+            alert.initModality(Modality.WINDOW_MODAL);
+            alert.initOwner(stage);
+
+            alert.showAndWait()
+                    .filter(buttonType -> buttonType == ButtonType.OK)
+                    .ifPresent(buttonType -> {
+                        GroupImplementation del = new GroupImplementation();
+                        del.deleteGroup(group);
+                        this.groups.remove(group);
+                        this.GroupTableView.getSelectionModel().clearSelection();
+                        this.contactActionBorderPane.setVisible(false);
+                        this.contactActionLabel.setVisible(false);
+                        this.contactActionLabel.setText(null);
+                        this.contactBorderPane.setCenter(null);
+                    });
+        });
+    }
+
     private void initContactActionFontIcons() {
         this.editbutton = new Button();
         this.editFontIcon = new FontIcon();
@@ -416,6 +764,13 @@ public class MainController implements Controller, Initializable {
         this.editFontIcon.setIconSize(18);
         this.editbutton.setGraphic(editFontIcon);
 
+        this.editGroupbutton = new Button();
+        this.editGroupFontIcon = new FontIcon();
+        this.editGroupFontIcon.setIconColor(Paint.valueOf("#3F51B5"));
+        this.editGroupFontIcon.setIconLiteral("mdi-pencil-box-outline");
+        this.editGroupFontIcon.setIconSize(18);
+        this.editGroupbutton.setGraphic(editGroupFontIcon);
+
 
         this.deletebutton = new Button();
         this.deleteFontIcon = new FontIcon();
@@ -423,6 +778,22 @@ public class MainController implements Controller, Initializable {
         this.deleteFontIcon.setIconLiteral("mdi-delete");
         this.deleteFontIcon.setIconSize(18);
         this.deletebutton.setGraphic(deleteFontIcon);
+
+
+        this.deleteGroupbutton = new Button();
+        this.deleteGroupFontIcon = new FontIcon();
+        this.deleteGroupFontIcon.setIconColor(Paint.valueOf("#3F51B5"));
+        this.deleteGroupFontIcon.setIconLiteral("mdi-delete");
+        this.deleteGroupFontIcon.setIconSize(18);
+        this.deleteGroupbutton.setGraphic(deleteGroupFontIcon);
+
+        this.addGroupButton = new Button();
+        this.addGroupFontIcon = new FontIcon();
+        this.addGroupFontIcon.setIconColor(Paint.valueOf("#3F51B5"));
+        this.addGroupFontIcon.setIconLiteral("mdi-account-multiple-plus");
+        this.addGroupFontIcon.setIconSize(18);
+        this.addGroupButton.setGraphic(addGroupFontIcon);
+
 
         this.cancelbutton = new Button();
         this.cancelFontIcon = new FontIcon();
