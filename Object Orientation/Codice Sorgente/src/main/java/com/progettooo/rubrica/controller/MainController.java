@@ -164,7 +164,7 @@ public class MainController implements Controller, Initializable {
     public void ContactSearch(){
 
         try {
-        PreparedStatement statement = connection.prepareStatement("Select C.idContact,C.first_name,C.last_name,E.email,A.street,A.city,A.postal_code,A.country,M.number as mobile,L.number as landline FROM CONTACT C,email E,landline L,mobile M,ADDRESS A where C.idContact = E.idContact AND E.idContact = L.idContact AND L.idContact = M.idContact and M.idContact = A.idContact and C.type = 'public' and A.typeA = 'primary'");
+        PreparedStatement statement = connection.prepareStatement("SELECT DISTINCT ON (C.idContact) C.idContact,C.first_name,C.last_name,E.email,A.street,A.city,A.postal_code,A.country,M.number as mobile,L.number as landline FROM CONTACT C,email E,landline L,mobile M,ADDRESS A where C.idContact = E.idContact AND E.idContact = L.idContact AND L.idContact = M.idContact and M.idContact = A.idContact and C.type = 'public' and A.typeA = 'primary'");
         ResultSet resultSet = statement.executeQuery();
 
 
