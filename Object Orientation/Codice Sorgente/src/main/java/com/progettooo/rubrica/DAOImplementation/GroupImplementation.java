@@ -113,7 +113,7 @@ public class GroupImplementation implements Group {
         ObservableList<Contact> contact = FXCollections.observableArrayList();
 
         try {
-            PreparedStatement statement = connection.prepareStatement("Select C.idContact,C.first_name,C.last_name,E.email,A.street,A.city,A.postal_code,A.country,M.number as mobile,L.number as landline FROM CONTACT C,email E,landline L,mobile M,ADDRESS A,Contact_Group CG where C.idContact = E.idContact AND E.idContact = L.idContact AND L.idContact = M.idContact and M.idContact = A.idContact and CG.name = "+"'"+group.getName()+"'"+" and C.idContact = CG.IdContact");
+            PreparedStatement statement = connection.prepareStatement("SELECT DISTINCT ON (C.idContact) C.idContact,C.first_name,C.last_name,E.email,A.street,A.city,A.postal_code,A.country,M.number as mobile,L.number as landline FROM CONTACT C,email E,landline L,mobile M,ADDRESS A,Contact_Group CG where C.idContact = E.idContact AND E.idContact = L.idContact AND L.idContact = M.idContact and M.idContact = A.idContact and CG.name = "+"'"+group.getName()+"'"+" and C.idContact = CG.IdContact");
             ResultSet resultSet = statement.executeQuery();
 
 
